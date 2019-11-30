@@ -4,16 +4,16 @@ import org.springframework.jms.listener.DefaultMessageListenerContainer;
 
 public class ServerMsgListenerContainer extends DefaultMessageListenerContainer {
 
-//	private String localSystem;
+	private String localSystem;
 
 	public ServerMsgListenerContainer() {
 		super();
 	}
 
-	/*public void setLocalSystem(String localSystem) {
+	public void setLocalSystem(String localSystem) {
 		this.localSystem = localSystem;
 		// 设置过滤器
-		String selector = JmsCode.MSG_HEADER_RECEIVESYSTEM + " in ( ";
+		String selector = "receiveSystem" + " in ( ";
 		String[] localSystems = localSystem.split(",");
 		for (String losystem : localSystems) {
 			selector = selector + "'" + losystem + "',";
@@ -26,5 +26,5 @@ public class ServerMsgListenerContainer extends DefaultMessageListenerContainer 
 			super.setMessageSelector(this.getMessageSelector() + " AND " + selector);
 		}
 	}
-*/
+
 }

@@ -64,11 +64,15 @@
 	<bean id="txnListenerContainer"
 		class="com.activemq.jms.server.ServerMsgListenerContainer">
 		<property name="concurrentConsumers" value="${jms.minListener}" /><!--同时启动 concurrentConsumers(如10) 个Listener 实例来并发消费消息-->
-		<!-- <property name="maxConcurrentConsumers" value="${jms.maxListener}" /> --><!-- 消费者数量上限 -->
+		<property name="maxConcurrentConsumers" value="${jms.maxListener}" /><!-- 消费者数量上限 -->
 		<property name="connectionFactory" ref="connectionFactory" />
-<!-- 		<property name="destination" ref="txnQueue" />
- -->		<property name="destination" ref="txnTopic" /><!-- topic模式下 没有使用jms.maxListener 每一条消息别消费concurrentConsumers 次-->
+		
+		<property name="destination" ref="txnQueue" /><!-- 点对点模式下 设置消费者上限，mq服务端根据队列消息量来动态控制消费者的数量并发的消费，一条消息只被消费一次默认情况下被消费时没有顺序 -->
+		<!-- <property name="destination" ref="txnTopic" /> --><!-- topic模式下 没有使用jms.maxListener 每一条消息被消费concurrentConsumers 次-->
+		
+		
 		<property name="messageListener" ref="servertxnListener" />
+		<property name="localSystem" value="${jms.localsystem}"/>
 	</bean>
 
 	<!--消息监听  从监听的队列中拉取消息-->

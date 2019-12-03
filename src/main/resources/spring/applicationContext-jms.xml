@@ -36,17 +36,6 @@
 		</property>
 	</bean>
 
-	<!-- 配置JMS模版 -->
-	<!-- 作用: spring自带的jms 将消息放到mq队列 -->
-	<bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
-		<property name="connectionFactory" ref="connectionFactory" />
-		<property name="receiveTimeout" value="${jms.revieve.timeout}" />
-		<property name="deliveryMode" value="1" />
-		<property name="explicitQosEnabled" value="true" />
-		<property name="timeToLive" value="3600000" />
-	</bean>
-
-
 	<!-- queue start 点对点 -->
 	<bean id="txnQueue" class="org.apache.activemq.command.ActiveMQQueue">
 		<constructor-arg index="0" value="${jms.queue.txnQueue}" />
@@ -61,19 +50,53 @@
 
 
 	<!-- server的配置 -->
-	<bean id="txnListenerContainer"
+	<!-- 1持久化订阅发布 -->
+		<bean id="txnListenerContainer"
 		class="com.activemq.jms.server.ServerMsgListenerContainer">
-		<property name="concurrentConsumers" value="${jms.minListener}" /><!--同时启动 concurrentConsumers(如10) 个Listener 实例来并发消费消息-->
-		<property name="maxConcurrentConsumers" value="${jms.maxListener}" /><!-- 消费者数量上限 -->
+<!-- 		同时启动 concurrentConsumers(如10) 个Listener 实例来并发消费消息
+ -->		<property name="concurrentConsumers" value="${jms.minListener}" />
 		<property name="connectionFactory" ref="connectionFactory" />
-		
-		<property name="destination" ref="txnQueue" /><!-- 点对点模式下 设置消费者上限，mq服务端根据队列消息量来动态控制消费者的数量并发的消费，一条消息只被消费一次默认情况下被消费时没有顺序 -->
-		<!-- <property name="destination" ref="txnTopic" /> --><!-- topic模式下 没有使用jms.maxListener 每一条消息被消费concurrentConsumers 次-->
-		
-		
 		<property name="messageListener" ref="servertxnListener" />
 		<property name="localSystem" value="${jms.localsystem}"/>
-	</bean>
+		
+		<property name="destination" ref="txnTopic" />
+<!-- 		发布订阅模式  
+ -->        <property name="pubSubDomain" value="true" />  
+<!-- 		 消息持久化值设置为true  
+ -->        <property name="subscriptionDurable" value="true" />  
+<!--          接收者ID 持久化注册到mq,消费者端唯一标识  
+ -->        <property name="clientId" value="clientId_001" />  
+        <property name="durableSubscriptionName" value="clientId_001" />  
+	</bean> 
+	
+	
+	<!-- 2非持久化订阅发布类似广播 -->
+	<!-- 	<bean id="txnListenerContainer"
+		class="com.activemq.jms.server.ServerMsgListenerContainer">
+		<property name="concurrentConsumers" value="${jms.minListener}" />
+		<property name="connectionFactory" ref="connectionFactory" />
+		
+		<property name="destination" ref="txnTopic" />
+		<property name="messageListener" ref="servertxnListener" />
+		<property name="localSystem" value="${jms.localsystem}"/>
+	</bean> -->
+	
+	
+	<!--3 持久化点对点模式 -->
+	<!-- <bean id="txnListenerContainer"
+		class="com.activemq.jms.server.ServerMsgListenerContainer">
+		<property name="concurrentConsumers" value="${jms.minListener}" />
+		<property name="maxConcurrentConsumers" value="${jms.maxListener}" />
+		<property name="connectionFactory" ref="connectionFactory" />
+		
+		<property name="destination" ref="txnQueue" />点对点模式下 设置消费者上限，mq服务端根据队列消息量来动态控制消费者的数量并发的消费，一条消息只被消费一次默认情况下被消费时没有顺序
+		<property name="messageListener" ref="servertxnListener" />
+		<property name="localSystem" value="${jms.localsystem}"/>
+	</bean> -->
+	
+	
+	
+	
 
 	<!--消息监听  从监听的队列中拉取消息-->
 	<bean id="servertxnListener" class="com.activemq.jms.server.ServerTxnListener">
